@@ -4,55 +4,44 @@ import java.util.Scanner;
 
 public class MiniTerminal {
 
-    public static void main(String[] args) {
-        String teclado = "";
+    public static void main(String[] args){
+        String teclado;
         boolean info;
         Scanner sc = new Scanner(System.in);
 
         MiniFileManager user = new MiniFileManager(); //Creamos un objeto MiniFileManager con el que vamos a interactuar
 
         System.out.println("**************************************************************************TERMINAL LINUX*********************************************************************************************");
-        do {
-            try {
-                                                                    //!!!!!!!!!!!!Problema con el exit que solucionaré
-                System.out.print(user.getRutaActual() + ":~$");
-                teclado = sc.nextLine();
-                String[] splitter = teclado.split(" "); //Creamos el splitter para separar las palabras por espacios
-                if (teclado.equals("pwd")) {
-                    System.out.println(user.getPWD());  //Llamamos al metodo con el objeto, si no habria que poner los metodos de la otra clase en static para poder usarlos.
-
-                } else if (splitter[0].equals("cd") && splitter[1].equals("..")) {
+        do {  
+            System.out.print(">");
+            teclado = sc.nextLine();
+            if (teclado.equals("pwd")) {
+                System.out.println(user.getPWD());  //Llamamos al metodo con el objeto, si no habria que poner los metodos de la otra clase en static para poder usarlos.
+            } else if (teclado.equals("ls")) {
+                info = false;
+                user.printList(info);
+            } else if (teclado.equals("ll")) {
+                info = true;
+                user.printList(info);
+            } else if (teclado.equals("help")) {   //Llamamos al metodo help para que nos muestre todos los comandos.
+                user.help();
+            } else if (teclado.contains(" ")) { //usamos contains para saber si teclado contiene espacios
+                String[] splitter = teclado.split(" "); //Creamos el splitter para separar las palabras por espacios cuando teclado contenga estos espacios.
+                if (splitter[0].equals("cd") && splitter[1].equals("..")) { //Si la posicion 0 del array splitter es igual a cd y la posicion 1 es .. se llamara al metodo.
                     user.cdPuntos();
-
                 } else if (teclado.equals("cd " + splitter[1])) {
                     user.changeDir(splitter[1]);
-
-                } else if (teclado.equals("ls")) {
-                    info = false;
-                    user.printList(info);
-
-                } else if (teclado.equals("ll")) {
-                    info = true;
-                    user.printList(info);
-
                 } else if (splitter[0].equals("mkdir") && splitter[1].equals("" + splitter[1])) {
                     user.mkdir(splitter[1]);
-
                 } else if (splitter[0].equals("rm") && splitter[1].equals("" + splitter[1])) {
                     user.remove(splitter[1]);
-
-                } else if (teclado.equals("mv " + splitter[1] + " " + splitter[2])) {  //Si existe el splitter 3 se mete dentro, si no se renombra.
+                } else if (teclado.equals("mv " + splitter[1] + " " + splitter[2])) {
                     user.move(splitter[1], splitter[2]);
-
-                } else if (teclado.equals("help")) {   //Llamamos al metodo help para que nos muestre todos los comandos.
-                    user.help();
-
                 }
-            } catch (Exception e) {
-                System.out.println("");
+            } else if (!teclado.equals("exit")) {
+                System.out.println(teclado + ": comando mal introducido. Use 'help' si necesita ayuda.");
             }
         } while (!teclado.equals("exit"));
-
         System.out.println("**************************************************************************PROGRAMA FINALIZADO****************************************************************************************");
     }
 }
@@ -86,7 +75,10 @@ actual. Si info es ‘true’ mostrará también su tamaño y fecha de modificac
 ● etc.
  */
 
- /*
+
+
+
+ /*             NO HAGAS CASO A ESTO.
 nombre = teclado.substring(teclado.indexOf(" "),teclado.length());    // Obtengo el nombre que se escribe despues del comando y seguido del espacio.
  */
  /*String[] splitterCd = user.getPWD().split("\\");    //Con getParent se consigue la carpeta padre entonces habria que poner la ruta actual hasta getParent.

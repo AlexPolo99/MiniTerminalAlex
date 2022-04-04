@@ -6,12 +6,8 @@ import java.util.Arrays;
 
 public class MiniFileManager {
 
-    final private File home = new File("");
+    final private File home = new File("");   //Creamos un File llamado hombre con una ruta vacia para guardar en rutaActual la ruta en la que nos encontramos.
     private File rutaActual = new File(home.getAbsoluteFile().toString());
-
-    public File getRutaActual() {
-        return rutaActual;
-    }
 
     public void help() {         //Metodo help que muestra la informacion del terminal.
         System.out.println("● pwd: Muestra cual es la carpeta actual.\n"
@@ -21,7 +17,7 @@ public class MiniFileManager {
                 + "● ll: Como ls pero muestra también el tamaño y la fecha de última modificación.\n"
                 + "● mkdir <DIR>: Crea el directorio ‘DIR’ en la carpeta actual.\n"
                 + "● rm <FILE>: Borra ‘FILE’. Si es una carpeta, borrará primero sus archivos y luego la carpeta. Si\n"
-                + "   tiene subcarpetas, las dejará intactas y mostrará un aviso al usuario.\n"
+                + "   wtiene subcarpetas, las dejará intactas y mostrará un aviso al usuario.\n"
                 + "● mv <FILE1> <FILE2>: Mueve o renombra ‘FILE1’ a ‘FILE2’.\n"
                 + "● exit: Termina el programa.");
     }
@@ -29,13 +25,16 @@ public class MiniFileManager {
     public String getPWD() {    //Mostramos la ruta actual
         return "" + rutaActual;
     }
-    //En este metodo no muestro la ruta para que el usuario tenga que usar pwd.
-
-    public boolean changeDir(String dir) {  //Cambia el directorio poniendo al final de la ruta la carpeta a la que quiere acceder el usuario.
-        File file = new File("" + dir);
-        rutaActual = file.getAbsoluteFile();  //Se actualiza la rutaActual al nombre del directorio que ha puesto el usuario.
-        return true;
-    }
+                //En algunos metodos no muestro un mensaje porque podemos usar el comando pwd o ver en la carpeta si se han dado los cambios.
+    public void changeDir(String dir){  //Cambia el directorio poniendo al final de la ruta la carpeta a la que quiere acceder el usuario.
+            File file = new File("" + dir);
+            if(file.exists()){
+                rutaActual = file.getAbsoluteFile();  //Se actualiza la rutaActual al nombre del directorio que ha puesto el usuario.
+                System.out.println("Se encuentra en: "+dir);
+            }else{ 
+                System.out.println("No existe el directorio al que intenta acceder"); 
+            }
+    } 
 
     public void cdPuntos() { //Volvemos al directorio anterior.
         File file = new File(rutaActual.getParent());   //Creamos un FILE con la ruta superior a la actual
@@ -43,60 +42,67 @@ public class MiniFileManager {
     }
 
     public void move(String nombre1, String nombre2) {
-        File f1 = new File("" + nombre1);
-        File f2 = new File("" + nombre2);
-        if (f1.renameTo(f2)) {
-            System.out.println(f1);
-            System.out.println("Se ha movido la carpeta.");
+        String ruta = rutaActual.getAbsolutePath();
+        File f1 = new File(ruta, nombre1);   //Guardamos los nombres en Files
+        File f2 = new File(ruta, nombre2);
+        if (f1.renameTo(f2)) {  //Movemos o cambiamos de nombre los files.
+            System.out.println("Carpeta movida o renombrada.");
         } else {
             System.out.println("No se ha podido mover o renombrar la carpeta.");
         }
     }
 
-    public void printList(boolean info) {
-        if (info == false) {
+    public void printList(boolean info) {   //muestra la informacion de el archivo o carpeta.
+        if (info == false) {        // si info es false significa que hemos utilizado ls.
             if (rutaActual.isFile()) {
                 System.out.println("************************");
-                System.out.println("[A] " + rutaActual.getName());
+                System.out.println("[A] " + rutaActual.getName());  //Si es un archivo muestra el nombre
+                System.out.println("************************");
+                System.out.println("");
+            } else {
+                File[] lista = rutaActual.listFiles();                 //Si es un directorio muestra el nombre de todo lo que contiene.
+                System.out.println("*************************************");
+                for (File i : lista) {  //Usamos un for each que ira creando files de cada posicion hasta que ocupe la longitud de la lista.
+                    File fD = i;
+                    if (fD.isDirectory()) {
+                        System.out.println("[*] " + fD.getName());
+                    }
+                }
+                for (File i : lista) {
+                    File fA = i;
+                    if (fA.isFile()) {
+                        System.out.println("[A] " + fA.getName());
+                    }
+                }
+                System.out.println("*************************************");
+                System.out.println("");
+            }
+        } else {                        // si info es true significa que hemos utilizado ll.
+            if (rutaActual.isFile()) {
+                System.out.println("************************");                 //Mostramos toda la informacion del archivo.
+                System.out.println("[A] " + rutaActual.getName() + " | Tamaño: " + rutaActual.length() + "bytes | Ultima modificacion: " + new SimpleDateFormat().format(rutaActual.lastModified()));
                 System.out.println("************************");
                 System.out.println("");
             } else {
                 File[] lista = rutaActual.listFiles();
+                Arrays.sort(lista);
                 System.out.println("*************************************");
-                for (int i = 0; i < lista.length; i++) {
-                    File f = lista[i];
+                for (File i : lista) {
+                    File f =i;
                     if (f.isDirectory()) {
-                        System.out.println("[*] " + f.getName());
+                        System.out.println("[*] " + f.getName() + " | Tamaño: " + f.length() + "bytes | Ultima modificacion: " + new SimpleDateFormat().format(f.lastModified()));
                     }
                 }
-                for (int i = 0; i < lista.length; i++) {
-                    File f = lista[i];
+
+                for (File i : lista) {  //Usamos un for each
+                    File f =i;
                     if (f.isFile()) {
-                        System.out.println("[A] " + f.getName());
+                        System.out.println("[A] " + f.getName() + " | Tamaño: " + f.length() + "bytes | Ultima modificacion: " + new SimpleDateFormat().format(f.lastModified()));
                     }
                 }
                 System.out.println("*************************************");
                 System.out.println("");
             }
-        } else {
-            File[] lista = rutaActual.listFiles();
-            Arrays.sort(lista);
-            System.out.println("*************************************");
-            for (int i = 0; i < lista.length; i++) {
-                File f = lista[i];
-                if (f.isDirectory()) {
-                    System.out.println("[*] " + f.getName() + " | Tamaño: " + f.length() + "bytes | Ultima modificacion: " + new SimpleDateFormat().format(f.lastModified()));
-                }
-            }
-
-            for (int i = 0; i < lista.length; i++) {
-                File f = lista[i];
-                if (f.isFile()) {
-                    System.out.println("[A] " + f.getName() + " | Tamaño: " + f.length() + "bytes | Ultima modificacion: " + new SimpleDateFormat().format(f.lastModified()));
-                }
-            }
-            System.out.println("*************************************");
-            System.out.println("");
         }
     }
 
@@ -106,21 +112,21 @@ public class MiniFileManager {
         File file = new File("" + nombre);    //Guardamos en un File el archivo que queremos eliminar.
         if (file.isFile()) {
             file.getAbsoluteFile().delete();    //Eliminamos el archivo.
-            System.out.println("Archivo " + file + " eliminado.");
+            System.out.println("Archivo " + file + " eliminado.");  //Mostramos que el archivo ha sido eliminado.
         } else {
-            File[] lista = file.listFiles();    //C
-            for (int i = 0; i < lista.length; i++) {
-                File fD = lista[i];
-                if (fD.isDirectory() && fD != file) {
+            File[] lista = file.listFiles();    //Si es una carpeta borramos todos los archivos y luego la carpeta.
+            for (File i : lista) {
+                File fD = i;
+                if (fD.isDirectory() && fD != file) {   //Si esta carpeta contiene subcarpetas ponemos el aviso en true.
                     aviso = true;
                 }
             }
-            if (aviso == true) {
+            if (aviso == true) {        //Si el aviso es true va a mostrar un aviso de que solo eliminara los archivos pero no los directorios.
                 System.out.println("Esta carpeta contiene subcarpetas. Los archivos y los directorios permaneceran intactos. "
                         + "Si quiere eliminarlos use rm en la subcarpeta.");
             } else {
-                for (int i = 0; i < lista.length; i++) {
-                    File f = lista[i];
+                for (File i : lista) {
+                    File f = i;
                     if (f.isFile()) {
                         f.delete();
                     }
@@ -131,9 +137,9 @@ public class MiniFileManager {
         }
     }
 
-    public void mkdir(String nombre) {
-        File f = new File(rutaActual + "\\" + nombre);
-        f.mkdir();
+    public void mkdir(String nombre) {  
+        File f = new File(rutaActual + "\\" + nombre);  // Creamos un File con la ruta de la carpeta actual + el nombre de la nueva carpeta creada.
+        f.mkdir();  //Con el metodo mkdir creamos la carpeta con la ruta introducida en f.
         System.out.println("Directorio " + nombre + " creado");
     }
 }
